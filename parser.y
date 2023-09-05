@@ -16,7 +16,7 @@ typedef std::stack<StringVector> StringStack;
 
 StringMap parser_map;
 StringStack parser_stack;
-int count = 0;
+int count = 1000;
 
 void addEntry(const char* key, const char* value, int lineno) {
   #ifdef debug
@@ -66,6 +66,7 @@ void printMap() {
 
 void clearParserMap() {
   parser_map.clear();
+  count = 1000;
 }
 
 StringMap getParsedMap() {
@@ -116,7 +117,7 @@ expr:
   '{' expr_list '}'
   {
     atLine(__LINE__);
-    char* temp = strdup("sub");
+    char* temp = strdup("t");
     char* index = strdup(std::to_string(parser_map.size()+count).c_str());
     ;
     char* tempIndex = strcat(temp, index);
@@ -138,7 +139,7 @@ expr:
   | IDENTIFIER '(' expr_list ')'
   {
     atLine(__LINE__);
-    char* temp = strdup("sub");
+    char* temp = strdup("t");
     char* index = strdup(std::to_string(parser_map.size()+count).c_str());
     ;
     char* tempIndex = strcat(temp, index);
@@ -158,7 +159,7 @@ expr:
   | expr '+' expr
   {
     atLine(__LINE__);
-    char* temp = strdup("sub");
+    char* temp = strdup("t");
     char* index = strdup(std::to_string(parser_map.size()+count).c_str());
     ;
     char* tempIndex = strcat(temp, index);
@@ -170,7 +171,7 @@ expr:
   | expr '-' expr
   {
     atLine(__LINE__);
-    char* temp = strdup("sub");
+    char* temp = strdup("t");
     char* index = strdup(std::to_string(parser_map.size()+count).c_str());
     ;
     char* tempIndex = strcat(temp, index);
@@ -182,7 +183,7 @@ expr:
   | '-' expr %prec UMINUS
   {
     atLine(__LINE__);
-    char* temp = strdup("sub");
+    char* temp = strdup("t");
     char* index = strdup(std::to_string(parser_map.size()+count).c_str());
     ;
     char* tempIndex = strcat(temp, index);
@@ -193,7 +194,7 @@ expr:
   | expr '*' expr
   {
     atLine(__LINE__);
-    char* temp = strdup("sub");
+    char* temp = strdup("t");
     char* index = strdup(std::to_string(parser_map.size()+count).c_str());
     ;
     char* tempIndex = strcat(temp, index);
@@ -205,7 +206,7 @@ expr:
   | expr '/' expr
   { 
     atLine(__LINE__);
-    char* temp = strdup("sub");
+    char* temp = strdup("t");
     char* index = strdup(std::to_string(parser_map.size()+count).c_str());
     ;
     char* tempIndex = strcat(temp, index);
@@ -217,7 +218,7 @@ expr:
   | expr '%' expr
   {
     atLine(__LINE__);
-    char* temp = strdup("sub");
+    char* temp = strdup("t");
     char* index = strdup(std::to_string(parser_map.size()+count).c_str());
     ;
     char* tempIndex = strcat(temp, index);
@@ -229,7 +230,7 @@ expr:
   | expr '@' expr
   {
     atLine(__LINE__);
-    char* temp = strdup("sub");
+    char* temp = strdup("t");
     char* index = strdup(std::to_string(parser_map.size()+count).c_str());
     ;
     char* tempIndex = strcat(temp, index);
@@ -241,7 +242,7 @@ expr:
   | expr '^' expr
   { 
     atLine(__LINE__);
-    char* temp = strdup("sub");
+    char* temp = strdup("t");
     char* index = strdup(std::to_string(parser_map.size()+count).c_str());
     ;
     char* tempIndex = strcat(temp, index);
