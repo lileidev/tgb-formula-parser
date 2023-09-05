@@ -162,7 +162,7 @@ expr:
     char* index = strdup(std::to_string(parser_map.size()+count).c_str());
     ;
     char* tempIndex = strcat(temp, index);
-    addEntry(tempIndex, "add", __LINE__);
+    addEntry(tempIndex, "Add", __LINE__);
     addEntry(tempIndex, $1, __LINE__);
     addEntry(tempIndex, $3, __LINE__);
     $$ = tempIndex;
@@ -174,7 +174,7 @@ expr:
     char* index = strdup(std::to_string(parser_map.size()+count).c_str());
     ;
     char* tempIndex = strcat(temp, index);
-    addEntry(tempIndex, "subtract", __LINE__);
+    addEntry(tempIndex, "Subtract", __LINE__);
     addEntry(tempIndex, $1, __LINE__);
     addEntry(tempIndex, $3, __LINE__);
     $$ = tempIndex;
@@ -186,7 +186,7 @@ expr:
     char* index = strdup(std::to_string(parser_map.size()+count).c_str());
     ;
     char* tempIndex = strcat(temp, index);
-    addEntry(tempIndex, "neg", __LINE__);
+    addEntry(tempIndex, "Neg", __LINE__);
     addEntry(tempIndex, $2, __LINE__);
     $$ = tempIndex;
   }
@@ -197,7 +197,7 @@ expr:
     char* index = strdup(std::to_string(parser_map.size()+count).c_str());
     ;
     char* tempIndex = strcat(temp, index);
-    addEntry(tempIndex, "multiply", __LINE__);
+    addEntry(tempIndex, "Multiply", __LINE__);
     addEntry(tempIndex, $1, __LINE__);
     addEntry(tempIndex, $3, __LINE__);
     $$ = tempIndex;
@@ -209,7 +209,7 @@ expr:
     char* index = strdup(std::to_string(parser_map.size()+count).c_str());
     ;
     char* tempIndex = strcat(temp, index);
-    addEntry(tempIndex, "divide", __LINE__);
+    addEntry(tempIndex, "Divide", __LINE__);
     addEntry(tempIndex, $1, __LINE__);
     addEntry(tempIndex, $3, __LINE__);
     $$ = tempIndex;
@@ -221,7 +221,7 @@ expr:
     char* index = strdup(std::to_string(parser_map.size()+count).c_str());
     ;
     char* tempIndex = strcat(temp, index);
-    addEntry(tempIndex, "remainder", __LINE__);
+    addEntry(tempIndex, "Remainder", __LINE__);
     addEntry(tempIndex, $1, __LINE__);
     addEntry(tempIndex, $3, __LINE__);
     $$ = tempIndex;
@@ -233,7 +233,7 @@ expr:
     char* index = strdup(std::to_string(parser_map.size()+count).c_str());
     ;
     char* tempIndex = strcat(temp, index);
-    addEntry(tempIndex, "matmul", __LINE__);
+    addEntry(tempIndex, "MatMul", __LINE__);
     addEntry(tempIndex, $1, __LINE__);
     addEntry(tempIndex, $3, __LINE__);
     $$ = tempIndex;
@@ -245,7 +245,7 @@ expr:
     char* index = strdup(std::to_string(parser_map.size()+count).c_str());
     ;
     char* tempIndex = strcat(temp, index);
-    addEntry(tempIndex, "power", __LINE__);
+    addEntry(tempIndex, "Power", __LINE__);
     addEntry(tempIndex, $1, __LINE__);
     addEntry(tempIndex, $3, __LINE__);
     $$ = tempIndex;
