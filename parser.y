@@ -5,7 +5,7 @@
 #include <stack>
 #include <iostream>
 
-#define debug
+// #define debug
 
 extern int yylex();
 extern void yyerror(const char*);
@@ -16,6 +16,7 @@ typedef std::stack<StringVector> StringStack;
 
 StringMap parser_map;
 StringStack parser_stack;
+int count = 0;
 
 void addEntry(const char* key, const char* value, int lineno) {
   #ifdef debug
@@ -77,7 +78,7 @@ StringMap getParsedMap() {
   char* strval;
 }
 
-%left ':'
+%right ':'
 %left '+' '-'
 %left '*' '/' '%'
 %left '@'
@@ -88,169 +89,195 @@ StringMap getParsedMap() {
 %token <strval> NUMBER
 %type <strval> expr
 %type <strval> expr_list
+%type <strval> statement
 
-%start expr
+%destructor { free($$); } expr
+
+%start statement
 
 %%
 
-expr:
-    IDENTIFIER ':' expr
-    {
-      atLine(__LINE__);
+statement: IDENTIFIER ':' expr
+  {
+    atLine(__LINE__);
+    auto it = parser_map.find($3);
+    if (it != parser_map.end()) {
+      parser_map[$1] = it->second;
+      parser_map.erase($3);
+    } else {
       addEntry($1, $3, __LINE__);
-      $$ = $3;
     }
-    | '{' expr_list '}'
-    {
-      atLine(__LINE__);
-      char* temp = strdup("sub");
-      char* index = strdup(std::to_string(parser_map.size()).c_str());
-      char* tempIndex = strcat(temp, index);
-      addEntry(tempIndex, "vector", __LINE__);
-      StringVector vec = parser_stack.top();
-      for (auto &v: vec) {
-        addEntry(tempIndex, v.c_str(), __LINE__);
-      }
+    count = parser_map.size();
+    $$ = $1;
+  }
+  ;
 
-      popStack(__LINE__);
-      
-      $$ = tempIndex;
-    }
-    | '(' expr_list ')'
-    {
-      atLine(__LINE__);
-      $$ = $2;
-    }
-    | IDENTIFIER '(' expr_list ')'
-    {
-      atLine(__LINE__);
-      char* temp = strdup("sub");
-      char* index = strdup(std::to_string(parser_map.size()).c_str());
-      char* tempIndex = strcat(temp, index);
-      addEntry(tempIndex, $1, __LINE__);
-      StringVector vec = parser_stack.top();
-      for (auto &v: vec) {
-        addEntry(tempIndex, v.c_str(), __LINE__);
-      }
-
-      popStack(__LINE__);
-      if (!parser_stack.empty()) {
-        addOperand(tempIndex, __LINE__);
-      }
-
-      $$ = tempIndex;
-    }
-    | IDENTIFIER
-    {
-      atLine(__LINE__);
-    }
-    | NUMBER
-    {
-      atLine(__LINE__);
-    }
-    | expr '+' expr
-    {
-      atLine(__LINE__);
-      char* temp = strdup("sub");
-      char* index = strdup(std::to_string(parser_map.size()).c_str());
-      char* tempIndex = strcat(temp, index);
-      addEntry(tempIndex, "Add", __LINE__);
-      addEntry(tempIndex, $1, __LINE__);
-      addEntry(tempIndex, $3, __LINE__);
-      $$ = tempIndex;
-    }
-    | expr '-' expr
-    {
-      atLine(__LINE__);
-      char* temp = strdup("sub");
-      char* index = strdup(std::to_string(parser_map.size()).c_str());
-      char* tempIndex = strcat(temp, index);
-      addEntry(tempIndex, "Subtract", __LINE__);
-      addEntry(tempIndex, $1, __LINE__);
-      addEntry(tempIndex, $3, __LINE__);
-      $$ = tempIndex;
-    }
-    | '-' expr %prec UMINUS
-    {
-      atLine(__LINE__);
-      char* temp = strdup("sub");
-      char* index = strdup(std::to_string(parser_map.size()).c_str());
-      char* tempIndex = strcat(temp, index);
-      addEntry(tempIndex, "Neg", __LINE__);
-      addEntry(tempIndex, $2, __LINE__);
-      $$ = tempIndex;
-    }
-    | expr '*' expr
-    {
-      atLine(__LINE__);
-      char* temp = strdup("sub");
-      char* index = strdup(std::to_string(parser_map.size()).c_str());
-      char* tempIndex = strcat(temp, index);
-      addEntry(tempIndex, "Multiply", __LINE__);
-      addEntry(tempIndex, $1, __LINE__);
-      addEntry(tempIndex, $3, __LINE__);
-      $$ = tempIndex;
-    }
-    | expr '/' expr
-    { 
-      atLine(__LINE__);
-      char* temp = strdup("sub");
-      char* index = strdup(std::to_string(parser_map.size()).c_str());
-      char* tempIndex = strcat(temp, index);
-      addEntry(tempIndex, "Divide", __LINE__);
-      addEntry(tempIndex, $1, __LINE__);
-      addEntry(tempIndex, $3, __LINE__);
-      $$ = tempIndex;
-    }
-    | expr '%' expr
-    {
-      atLine(__LINE__);
-      char* temp = strdup("sub");
-      char* index = strdup(std::to_string(parser_map.size()).c_str());
-      char* tempIndex = strcat(temp, index);
-      addEntry(tempIndex, "Remainder", __LINE__);
-      addEntry(tempIndex, $1, __LINE__);
-      addEntry(tempIndex, $3, __LINE__);
-      $$ = tempIndex;
-    }
-    | expr '@' expr
-    {
-      atLine(__LINE__);
-      char* temp = strdup("sub");
-      char* index = strdup(std::to_string(parser_map.size()).c_str());
-      char* tempIndex = strcat(temp, index);
-      addEntry(tempIndex, "MatMul", __LINE__);
-      addEntry(tempIndex, $1, __LINE__);
-      addEntry(tempIndex, $3, __LINE__);
-      $$ = tempIndex;
-    } 
-    | expr '^' expr
-    { 
-      atLine(__LINE__);
-      char* temp = strdup("sub");
-      char* index = strdup(std::to_string(parser_map.size()).c_str());
-      char* tempIndex = strcat(temp, index);
-      addEntry(tempIndex, "Power", __LINE__);
-      addEntry(tempIndex, $1, __LINE__);
-      addEntry(tempIndex, $3, __LINE__);
-      $$ = tempIndex;
-    }
+expr:
+  '{' expr_list '}'
+  {
+    atLine(__LINE__);
+    char* temp = strdup("sub");
+    char* index = strdup(std::to_string(parser_map.size()+count).c_str());
     ;
+    char* tempIndex = strcat(temp, index);
+    addEntry(tempIndex, "vector", __LINE__);
+    StringVector vec = parser_stack.top();
+    for (auto &v: vec) {
+      addEntry(tempIndex, v.c_str(), __LINE__);
+    }
+
+    popStack(__LINE__);
+    
+    $$ = tempIndex;
+  }
+  | '(' expr_list ')'
+  {
+    atLine(__LINE__);
+    $$ = $2;
+  }
+  | IDENTIFIER '(' expr_list ')'
+  {
+    atLine(__LINE__);
+    char* temp = strdup("sub");
+    char* index = strdup(std::to_string(parser_map.size()+count).c_str());
+    ;
+    char* tempIndex = strcat(temp, index);
+    addEntry(tempIndex, $1, __LINE__);
+    StringVector vec = parser_stack.top();
+    for (auto &v: vec) {
+      addEntry(tempIndex, v.c_str(), __LINE__);
+    }
+
+    popStack(__LINE__);
+    if (!parser_stack.empty()) {
+      addOperand(tempIndex, __LINE__);
+    }
+
+    $$ = tempIndex;
+  }
+  | expr '+' expr
+  {
+    atLine(__LINE__);
+    char* temp = strdup("sub");
+    char* index = strdup(std::to_string(parser_map.size()+count).c_str());
+    ;
+    char* tempIndex = strcat(temp, index);
+    addEntry(tempIndex, "add", __LINE__);
+    addEntry(tempIndex, $1, __LINE__);
+    addEntry(tempIndex, $3, __LINE__);
+    $$ = tempIndex;
+  }
+  | expr '-' expr
+  {
+    atLine(__LINE__);
+    char* temp = strdup("sub");
+    char* index = strdup(std::to_string(parser_map.size()+count).c_str());
+    ;
+    char* tempIndex = strcat(temp, index);
+    addEntry(tempIndex, "subtract", __LINE__);
+    addEntry(tempIndex, $1, __LINE__);
+    addEntry(tempIndex, $3, __LINE__);
+    $$ = tempIndex;
+  }
+  | '-' expr %prec UMINUS
+  {
+    atLine(__LINE__);
+    char* temp = strdup("sub");
+    char* index = strdup(std::to_string(parser_map.size()+count).c_str());
+    ;
+    char* tempIndex = strcat(temp, index);
+    addEntry(tempIndex, "neg", __LINE__);
+    addEntry(tempIndex, $2, __LINE__);
+    $$ = tempIndex;
+  }
+  | expr '*' expr
+  {
+    atLine(__LINE__);
+    char* temp = strdup("sub");
+    char* index = strdup(std::to_string(parser_map.size()+count).c_str());
+    ;
+    char* tempIndex = strcat(temp, index);
+    addEntry(tempIndex, "multiply", __LINE__);
+    addEntry(tempIndex, $1, __LINE__);
+    addEntry(tempIndex, $3, __LINE__);
+    $$ = tempIndex;
+  }
+  | expr '/' expr
+  { 
+    atLine(__LINE__);
+    char* temp = strdup("sub");
+    char* index = strdup(std::to_string(parser_map.size()+count).c_str());
+    ;
+    char* tempIndex = strcat(temp, index);
+    addEntry(tempIndex, "divide", __LINE__);
+    addEntry(tempIndex, $1, __LINE__);
+    addEntry(tempIndex, $3, __LINE__);
+    $$ = tempIndex;
+  }
+  | expr '%' expr
+  {
+    atLine(__LINE__);
+    char* temp = strdup("sub");
+    char* index = strdup(std::to_string(parser_map.size()+count).c_str());
+    ;
+    char* tempIndex = strcat(temp, index);
+    addEntry(tempIndex, "remainder", __LINE__);
+    addEntry(tempIndex, $1, __LINE__);
+    addEntry(tempIndex, $3, __LINE__);
+    $$ = tempIndex;
+  }
+  | expr '@' expr
+  {
+    atLine(__LINE__);
+    char* temp = strdup("sub");
+    char* index = strdup(std::to_string(parser_map.size()+count).c_str());
+    ;
+    char* tempIndex = strcat(temp, index);
+    addEntry(tempIndex, "matmul", __LINE__);
+    addEntry(tempIndex, $1, __LINE__);
+    addEntry(tempIndex, $3, __LINE__);
+    $$ = tempIndex;
+  } 
+  | expr '^' expr
+  { 
+    atLine(__LINE__);
+    char* temp = strdup("sub");
+    char* index = strdup(std::to_string(parser_map.size()+count).c_str());
+    ;
+    char* tempIndex = strcat(temp, index);
+    addEntry(tempIndex, "power", __LINE__);
+    addEntry(tempIndex, $1, __LINE__);
+    addEntry(tempIndex, $3, __LINE__);
+    $$ = tempIndex;
+  }
+  | IDENTIFIER
+  {
+    atLine(__LINE__);
+    $$ = $1;
+  }
+  | NUMBER
+  {
+    atLine(__LINE__);
+    $$ = $1;
+  }
+  ;
 
 expr_list:
-    expr {
-      StringVector vec;
-      pushStack(vec, __LINE__);
-      addOperand($1, __LINE__);
-      $$ = $1;
-    }
-    | expr_list ',' expr
-    {
-      atLine(__LINE__);
-      addOperand($3, __LINE__);
-      $$ = $1;
-    }
-    ;
+  expr
+  {
+    atLine(__LINE__);
+    StringVector vec;
+    pushStack(vec, __LINE__);
+    addOperand($1, __LINE__);
+    $$ = $1;
+  }
+  | expr_list ',' expr
+  {
+    atLine(__LINE__);
+    addOperand($3, __LINE__);
+    $$ = $1;
+  }
+  ;
 
 %%
 
