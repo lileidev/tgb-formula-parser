@@ -107,7 +107,7 @@ statement: IDENTIFIER ':' expr
     } else {
       addEntry($1, $3, __LINE__);
     }
-    count = parser_map.size();
+    count += parser_map.size();
     $$ = $1;
   }
   ;
