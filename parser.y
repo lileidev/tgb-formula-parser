@@ -90,7 +90,7 @@ StringMap getParsedMap() {
 
 %token <strval> IDENTIFIER
 %token <strval> NUMBER
-%token <strval> NEGATIVE_NUMBER
+%token <strval> PI
 %type <strval> expr
 %type <strval> expr_list
 %type <strval> statement
@@ -253,6 +253,11 @@ expr:
     addEntry(tempIndex, $3, __LINE__);
     $$ = tempIndex;
   }
+  | PI {
+    atLine(__LINE__);
+    char *temp = strdup("3.14159265358979323846264338327950288419716939937510");
+    $$ = temp;
+  }
   | IDENTIFIER
   {
     atLine(__LINE__);
@@ -260,10 +265,6 @@ expr:
   }
   | NUMBER
   {
-    atLine(__LINE__);
-    $$ = $1;
-  }
-  | NEGATIVE_NUMBER {
     atLine(__LINE__);
     $$ = $1;
   }
