@@ -86,8 +86,11 @@ StringMap getParsedMap() {
 %left '^'
 %nonassoc UMINUS
 
+%define parse.error verbose
+
 %token <strval> IDENTIFIER
 %token <strval> NUMBER
+%token <strval> NEGATIVE_NUMBER
 %type <strval> expr
 %type <strval> expr_list
 %type <strval> statement
@@ -185,7 +188,6 @@ expr:
     atLine(__LINE__);
     char* temp = strdup("t");
     char* index = strdup(std::to_string(parser_map.size()+count).c_str());
-    ;
     char* tempIndex = strcat(temp, index);
     addEntry(tempIndex, "Neg", __LINE__);
     addEntry(tempIndex, $2, __LINE__);
@@ -261,6 +263,10 @@ expr:
     atLine(__LINE__);
     $$ = $1;
   }
+  | NEGATIVE_NUMBER {
+    atLine(__LINE__);
+    $$ = $1;
+  }
   ;
 
 expr_list:
@@ -283,5 +289,5 @@ expr_list:
 %%
 
 void yyerror(const char* s) {
-  printf("Error: %s\n", s);
+  throw std::runtime_error(s);
 }

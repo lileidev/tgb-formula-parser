@@ -6,7 +6,7 @@ int extern printMap();
 extern void clearParserMap();
 
 int main() {
-    YY_BUFFER_STATE buffer = yy_scan_string("t2: -output / y * dout");
+    YY_BUFFER_STATE buffer = yy_scan_string("t2: -1 + (-output / y * dout)");
     yyparse();
     printMap();
 
