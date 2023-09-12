@@ -14,9 +14,14 @@ extern int yylex();
 
 %%
 [ \t\n]         ; // ignore space, tab and newline symbol
-pi              { yylval.strval = strdup(yytext); return PI; }
+[-+*/%@^(){}:,.\[\]]      { return yytext[0]; }
+pi              { return PI; }
+".shape"        { return GET_SHAPE; }
+".strides"      { return GET_STRIDES; }
 [a-zA-Z_][a-zA-Z0-9_]*  { yylval.strval = strdup(yytext); return IDENTIFIER; }
-[-+*/%@^(){},:]      { return yytext[0]; }
 -?[0-9]+(\.[0-9]+)?         { yylval.strval = strdup(yytext); return NUMBER; }
 .               { printf("Invalid character: %s\n", yytext); }
 %%
+
+// release strdup memory
+

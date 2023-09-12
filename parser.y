@@ -5,7 +5,7 @@
 #include <stack>
 #include <iostream>
 
-// #define debug
+#define debug
 
 extern int yylex();
 extern void yyerror(const char*);
@@ -84,18 +84,28 @@ StringMap getParsedMap() {
 %left '*' '/' '%'
 %left '@'
 %left '^'
+%left '.'
 %nonassoc UMINUS
 
 %define parse.error verbose
 
 %token <strval> IDENTIFIER
 %token <strval> NUMBER
+%token <strval> GET_SHAPE
+%token <strval> GET_STRIDES
 %token <strval> PI
+%token <strval> tempIndex
+%token <strval> tempPi
+
 %type <strval> expr
 %type <strval> expr_list
 %type <strval> statement
+%type <strval> get_property
 
-%destructor { free($$); } expr
+%destructor {
+  free ($$);
+  std::cout << "here " << std::endl;
+} <*>
 
 %start statement
 
@@ -117,13 +127,24 @@ statement: IDENTIFIER ':' expr
   ;
 
 expr:
-  '{' expr_list '}'
+  get_property
+  {
+    atLine(__LINE__);
+    $$ = $1;
+  }
+  | '{' expr_list '}'
   {
     atLine(__LINE__);
     char* temp = strdup("t");
     char* index = strdup(std::to_string(parser_map.size()+count).c_str());
-    ;
-    char* tempIndex = strcat(temp, index);
+    size_t tempLength = strlen(temp);
+    size_t indexLength = strlen(index);
+    size_t maxLength = tempLength + indexLength + 1;  // add 1 for end symbol
+
+    char* tempIndex = (char*)malloc(maxLength);
+    strcpy(tempIndex, temp);
+    strncat(tempIndex, index, maxLength - tempLength);
+
     addEntry(tempIndex, "vector", __LINE__);
     StringVector vec = parser_stack.top();
     for (auto &v: vec) {
@@ -131,7 +152,52 @@ expr:
     }
 
     popStack(__LINE__);
-    
+
+    free(temp);
+    free(index);
+
+    $$ = tempIndex;
+  }
+  | IDENTIFIER '[' NUMBER ']'
+  {
+    atLine(__LINE__);
+    char* temp = strdup("t");
+    char* index = strdup(std::to_string(parser_map.size()+count).c_str());
+    size_t tempLength = strlen(temp);
+    size_t indexLength = strlen(index);
+    size_t maxLength = tempLength + indexLength + 1;  // add 1 for end symbol
+
+    char* tempIndex = (char*)malloc(maxLength);
+    strcpy(tempIndex, temp);
+    strncat(tempIndex, index, maxLength - tempLength);
+    addEntry(tempIndex, "RetrievingValueByIndex", __LINE__);
+    addEntry(tempIndex, $1, __LINE__);
+    addEntry(tempIndex, $3, __LINE__);
+
+    free(temp);
+    free(index);
+
+    $$ = tempIndex;
+  }
+  | get_property '[' NUMBER ']'
+  {
+    atLine(__LINE__);
+    char* temp = strdup("t");
+    char* index = strdup(std::to_string(parser_map.size()+count).c_str());
+    size_t tempLength = strlen(temp);
+    size_t indexLength = strlen(index);
+    size_t maxLength = tempLength + indexLength + 1;  // add 1 for end symbol
+
+    char* tempIndex = (char*)malloc(maxLength);
+    strcpy(tempIndex, temp);
+    strncat(tempIndex, index, maxLength - tempLength);
+    addEntry(tempIndex, "RetrievingValueByIndex", __LINE__);
+    addEntry(tempIndex, $1, __LINE__);
+    addEntry(tempIndex, $3, __LINE__);
+
+    free(temp);
+    free(index);    
+
     $$ = tempIndex;
   }
   | '(' expr_list ')'
@@ -144,8 +210,13 @@ expr:
     atLine(__LINE__);
     char* temp = strdup("t");
     char* index = strdup(std::to_string(parser_map.size()+count).c_str());
-    ;
-    char* tempIndex = strcat(temp, index);
+    size_t tempLength = strlen(temp);
+    size_t indexLength = strlen(index);
+    size_t maxLength = tempLength + indexLength + 1;  // add 1 for end symbol
+
+    char* tempIndex = (char*)malloc(maxLength);
+    strcpy(tempIndex, temp);
+    strncat(tempIndex, index, maxLength - tempLength);
     addEntry(tempIndex, $1, __LINE__);
     StringVector vec = parser_stack.top();
     for (auto &v: vec) {
@@ -157,6 +228,9 @@ expr:
       addOperand(tempIndex, __LINE__);
     }
 
+    free(temp);
+    free(index);    
+
     $$ = tempIndex;
   }
   | expr '+' expr
@@ -164,11 +238,20 @@ expr:
     atLine(__LINE__);
     char* temp = strdup("t");
     char* index = strdup(std::to_string(parser_map.size()+count).c_str());
-    ;
-    char* tempIndex = strcat(temp, index);
+    size_t tempLength = strlen(temp);
+    size_t indexLength = strlen(index);
+    size_t maxLength = tempLength + indexLength + 1;  // add 1 for end symbol
+
+    char* tempIndex = (char*)malloc(maxLength);
+    strcpy(tempIndex, temp);
+    strncat(tempIndex, index, maxLength - tempLength);
     addEntry(tempIndex, "Add", __LINE__);
     addEntry(tempIndex, $1, __LINE__);
     addEntry(tempIndex, $3, __LINE__);
+
+    free(temp);
+    free(index);    
+
     $$ = tempIndex;
   }
   | expr '-' expr
@@ -176,11 +259,20 @@ expr:
     atLine(__LINE__);
     char* temp = strdup("t");
     char* index = strdup(std::to_string(parser_map.size()+count).c_str());
-    ;
-    char* tempIndex = strcat(temp, index);
+    size_t tempLength = strlen(temp);
+    size_t indexLength = strlen(index);
+    size_t maxLength = tempLength + indexLength + 1;  // add 1 for end symbol
+
+    char* tempIndex = (char*)malloc(maxLength);
+    strcpy(tempIndex, temp);
+    strncat(tempIndex, index, maxLength - tempLength);
     addEntry(tempIndex, "Subtract", __LINE__);
     addEntry(tempIndex, $1, __LINE__);
     addEntry(tempIndex, $3, __LINE__);
+
+    free(temp);
+    free(index);    
+
     $$ = tempIndex;
   }
   | '-' expr %prec UMINUS
@@ -188,9 +280,19 @@ expr:
     atLine(__LINE__);
     char* temp = strdup("t");
     char* index = strdup(std::to_string(parser_map.size()+count).c_str());
-    char* tempIndex = strcat(temp, index);
+    size_t tempLength = strlen(temp);
+    size_t indexLength = strlen(index);
+    size_t maxLength = tempLength + indexLength + 1;  // add 1 for end symbol
+
+    char* tempIndex = (char*)malloc(maxLength);
+    strcpy(tempIndex, temp);
+    strncat(tempIndex, index, maxLength - tempLength);
     addEntry(tempIndex, "Neg", __LINE__);
     addEntry(tempIndex, $2, __LINE__);
+
+    free(temp);
+    free(index);    
+
     $$ = tempIndex;
   }
   | expr '*' expr
@@ -198,11 +300,20 @@ expr:
     atLine(__LINE__);
     char* temp = strdup("t");
     char* index = strdup(std::to_string(parser_map.size()+count).c_str());
-    ;
-    char* tempIndex = strcat(temp, index);
+    size_t tempLength = strlen(temp);
+    size_t indexLength = strlen(index);
+    size_t maxLength = tempLength + indexLength + 1;  // add 1 for end symbol
+
+    char* tempIndex = (char*)malloc(maxLength);
+    strcpy(tempIndex, temp);
+    strncat(tempIndex, index, maxLength - tempLength);
     addEntry(tempIndex, "Multiply", __LINE__);
     addEntry(tempIndex, $1, __LINE__);
     addEntry(tempIndex, $3, __LINE__);
+
+    free(temp);
+    free(index);    
+
     $$ = tempIndex;
   }
   | expr '/' expr
@@ -210,11 +321,20 @@ expr:
     atLine(__LINE__);
     char* temp = strdup("t");
     char* index = strdup(std::to_string(parser_map.size()+count).c_str());
-    ;
-    char* tempIndex = strcat(temp, index);
+    size_t tempLength = strlen(temp);
+    size_t indexLength = strlen(index);
+    size_t maxLength = tempLength + indexLength + 1;  // add 1 for end symbol
+
+    char* tempIndex = (char*)malloc(maxLength);
+    strcpy(tempIndex, temp);
+    strncat(tempIndex, index, maxLength - tempLength);
     addEntry(tempIndex, "Divide", __LINE__);
     addEntry(tempIndex, $1, __LINE__);
     addEntry(tempIndex, $3, __LINE__);
+
+    free(temp);
+    free(index);    
+
     $$ = tempIndex;
   }
   | expr '%' expr
@@ -222,11 +342,20 @@ expr:
     atLine(__LINE__);
     char* temp = strdup("t");
     char* index = strdup(std::to_string(parser_map.size()+count).c_str());
-    ;
-    char* tempIndex = strcat(temp, index);
+    size_t tempLength = strlen(temp);
+    size_t indexLength = strlen(index);
+    size_t maxLength = tempLength + indexLength + 1;  // add 1 for end symbol
+
+    char* tempIndex = (char*)malloc(maxLength);
+    strcpy(tempIndex, temp);
+    strncat(tempIndex, index, maxLength - tempLength);
     addEntry(tempIndex, "Remainder", __LINE__);
     addEntry(tempIndex, $1, __LINE__);
     addEntry(tempIndex, $3, __LINE__);
+
+    free(temp);
+    free(index);    
+
     $$ = tempIndex;
   }
   | expr '@' expr
@@ -234,11 +363,20 @@ expr:
     atLine(__LINE__);
     char* temp = strdup("t");
     char* index = strdup(std::to_string(parser_map.size()+count).c_str());
-    ;
-    char* tempIndex = strcat(temp, index);
+    size_t tempLength = strlen(temp);
+    size_t indexLength = strlen(index);
+    size_t maxLength = tempLength + indexLength + 1;  // add 1 for end symbol
+
+    char* tempIndex = (char*)malloc(maxLength);
+    strcpy(tempIndex, temp);
+    strncat(tempIndex, index, maxLength - tempLength);
     addEntry(tempIndex, "MatMul", __LINE__);
     addEntry(tempIndex, $1, __LINE__);
     addEntry(tempIndex, $3, __LINE__);
+
+    free(temp);
+    free(index);    
+
     $$ = tempIndex;
   } 
   | expr '^' expr
@@ -246,27 +384,88 @@ expr:
     atLine(__LINE__);
     char* temp = strdup("t");
     char* index = strdup(std::to_string(parser_map.size()+count).c_str());
-    ;
-    char* tempIndex = strcat(temp, index);
+    size_t tempLength = strlen(temp);
+    size_t indexLength = strlen(index);
+    size_t maxLength = tempLength + indexLength + 1;  // add 1 for end symbol
+
+    char* tempIndex = (char*)malloc(maxLength);
+    strcpy(tempIndex, temp);
+    strncat(tempIndex, index, maxLength - tempLength);
     addEntry(tempIndex, "Power", __LINE__);
     addEntry(tempIndex, $1, __LINE__);
     addEntry(tempIndex, $3, __LINE__);
+
+    free(temp);
+    free(index);
+
     $$ = tempIndex;
   }
   | PI {
     atLine(__LINE__);
-    char *temp = strdup("3.14159265358979323846264338327950288419716939937510");
-    $$ = temp;
+    char *tempPi = strdup("3.14159265358979323846264338327950288419716939937510");
+  
+    $$ = tempPi;
   }
   | IDENTIFIER
   {
     atLine(__LINE__);
-    $$ = $1;
+    
+    char *temp = strdup($1);
+    free($1);
+
+    $$ = temp;
   }
   | NUMBER
   {
     atLine(__LINE__);
-    $$ = $1;
+
+    char *temp = strdup($1);
+    free($1);
+
+    $$ = temp;
+  }
+  ;
+
+get_property:
+  IDENTIFIER GET_SHAPE
+  {
+    atLine(__LINE__);
+    char* temp = strdup("t");
+    char* index = strdup(std::to_string(parser_map.size()+count).c_str());
+    size_t tempLength = strlen(temp);
+    size_t indexLength = strlen(index);
+    size_t maxLength = tempLength + indexLength + 1;  // add 1 for end symbol
+
+    char* tempIndex = (char*)malloc(maxLength);
+    strcpy(tempIndex, temp);
+    strncat(tempIndex, index, maxLength - tempLength);
+    addEntry(tempIndex, "GetShapeOfTensor", __LINE__);
+    addEntry(tempIndex, $1, __LINE__);
+
+    free(temp);
+    free(index);    
+
+    $$ = tempIndex;
+  }
+  | IDENTIFIER GET_STRIDES
+  {
+    atLine(__LINE__);
+    char* temp = strdup("t");
+    char* index = strdup(std::to_string(parser_map.size()+count).c_str());
+    size_t tempLength = strlen(temp);
+    size_t indexLength = strlen(index);
+    size_t maxLength = tempLength + indexLength + 1;  // add 1 for end symbol
+
+    char* tempIndex = (char*)malloc(maxLength);
+    strcpy(tempIndex, temp);
+    strncat(tempIndex, index, maxLength - tempLength);
+    addEntry(tempIndex, "GetStridesOfTensor", __LINE__);
+    addEntry(tempIndex, $1, __LINE__);
+
+    free(temp);
+    free(index);    
+
+    $$ = tempIndex;   
   }
   ;
 

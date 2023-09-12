@@ -7,4 +7,4 @@ bison -d parser.y -o parser.c -v
 
 flex lexer.l
 
-g++ main.cpp lexer.c parser.c -o parser
+g++ main.cpp lexer.c parser.c -o parser -g -fsanitize=address -fno-omit-frame-pointer
