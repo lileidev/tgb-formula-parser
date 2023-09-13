@@ -5,7 +5,7 @@
 #include <stack>
 #include <iostream>
 
-#define debug
+// #define debug
 
 extern int yylex();
 extern void yyerror(const char*);
@@ -17,6 +17,9 @@ typedef std::stack<StringVector> StringStack;
 StringMap parser_map;
 StringStack parser_stack;
 int count = 1000;
+
+// A container to store allocated memory pointer
+std::vector<char*> allocated_ptr;
 
 void addEntry(const char* key, const char* value, int lineno) {
   #ifdef debug
@@ -34,14 +37,14 @@ void addOperand(const char* operand, int lineno) {
 
 void pushStack(std::vector<std::string> vec, int lineno) {
   #ifdef debug  
-      std::cout << "push stack at " << lineno << std::endl;
+    std::cout << "push stack at " << lineno << std::endl;
   #endif
   parser_stack.push(vec);
 }
 
 void popStack(int lineno) {
   #ifdef debug  
-      std::cout << "pop stack at " << lineno << std::endl;
+    std::cout << "pop stack at " << lineno << std::endl;
   #endif
   parser_stack.pop();
 }
@@ -65,6 +68,13 @@ void printMap() {
 }
 
 void clearParserMap() {
+  // free allocated memory by molloc and strdup to prevent memory leak.
+  for (const auto &ptr : allocated_ptr) {
+    # ifdef debug
+      std::cout << ptr << " freed." << std::endl;
+    # endif
+    free(ptr);
+  }
   parser_map.clear();
   count = 1000;
 }
@@ -94,37 +104,15 @@ StringMap getParsedMap() {
 %token <strval> GET_SHAPE
 %token <strval> GET_STRIDES
 %token <strval> PI
-%token <strval> tempIndex
-%token <strval> tempPi
 
 %type <strval> expr
 %type <strval> expr_list
-%type <strval> statement
 %type <strval> get_property
 
-%destructor {
-  free ($$);
-  std::cout << "here " << std::endl;
-} <*>
 
-%start statement
+%start expr
 
 %%
-
-statement: IDENTIFIER ':' expr
-  {
-    atLine(__LINE__);
-    auto it = parser_map.find($3);
-    if (it != parser_map.end()) {
-      parser_map[$1] = it->second;
-      parser_map.erase($3);
-    } else {
-      addEntry($1, $3, __LINE__);
-    }
-    count += parser_map.size();
-    $$ = $1;
-  }
-  ;
 
 expr:
   get_property
@@ -156,6 +144,8 @@ expr:
     free(temp);
     free(index);
 
+    allocated_ptr.emplace_back(tempIndex);
+
     $$ = tempIndex;
   }
   | IDENTIFIER '[' NUMBER ']'
@@ -177,6 +167,10 @@ expr:
     free(temp);
     free(index);
 
+    allocated_ptr.emplace_back($1);
+    allocated_ptr.emplace_back($3);
+    allocated_ptr.emplace_back(tempIndex);
+
     $$ = tempIndex;
   }
   | get_property '[' NUMBER ']'
@@ -197,6 +191,9 @@ expr:
 
     free(temp);
     free(index);    
+
+    allocated_ptr.emplace_back($3);
+    allocated_ptr.emplace_back(tempIndex);
 
     $$ = tempIndex;
   }
@@ -229,7 +226,10 @@ expr:
     }
 
     free(temp);
-    free(index);    
+    free(index);
+
+    allocated_ptr.emplace_back($1);
+    allocated_ptr.emplace_back(tempIndex);
 
     $$ = tempIndex;
   }
@@ -250,7 +250,9 @@ expr:
     addEntry(tempIndex, $3, __LINE__);
 
     free(temp);
-    free(index);    
+    free(index);
+
+    allocated_ptr.emplace_back(tempIndex); 
 
     $$ = tempIndex;
   }
@@ -271,7 +273,9 @@ expr:
     addEntry(tempIndex, $3, __LINE__);
 
     free(temp);
-    free(index);    
+    free(index);
+
+    allocated_ptr.emplace_back(tempIndex);   
 
     $$ = tempIndex;
   }
@@ -291,7 +295,9 @@ expr:
     addEntry(tempIndex, $2, __LINE__);
 
     free(temp);
-    free(index);    
+    free(index);
+
+    allocated_ptr.emplace_back(tempIndex); 
 
     $$ = tempIndex;
   }
@@ -312,7 +318,9 @@ expr:
     addEntry(tempIndex, $3, __LINE__);
 
     free(temp);
-    free(index);    
+    free(index);
+
+    allocated_ptr.emplace_back(tempIndex);  
 
     $$ = tempIndex;
   }
@@ -333,7 +341,9 @@ expr:
     addEntry(tempIndex, $3, __LINE__);
 
     free(temp);
-    free(index);    
+    free(index);
+
+    allocated_ptr.emplace_back(tempIndex);    
 
     $$ = tempIndex;
   }
@@ -354,7 +364,9 @@ expr:
     addEntry(tempIndex, $3, __LINE__);
 
     free(temp);
-    free(index);    
+    free(index);
+
+    allocated_ptr.emplace_back(tempIndex);   
 
     $$ = tempIndex;
   }
@@ -375,7 +387,9 @@ expr:
     addEntry(tempIndex, $3, __LINE__);
 
     free(temp);
-    free(index);    
+    free(index);
+
+    allocated_ptr.emplace_back(tempIndex);    
 
     $$ = tempIndex;
   } 
@@ -398,31 +412,50 @@ expr:
     free(temp);
     free(index);
 
+    allocated_ptr.emplace_back(tempIndex);
+
     $$ = tempIndex;
   }
   | PI {
     atLine(__LINE__);
     char *tempPi = strdup("3.14159265358979323846264338327950288419716939937510");
+
+    allocated_ptr.emplace_back(tempPi);
   
     $$ = tempPi;
   }
   | IDENTIFIER
   {
     atLine(__LINE__);
-    
-    char *temp = strdup($1);
-    free($1);
 
-    $$ = temp;
+    allocated_ptr.emplace_back($1);
+
+    $$ = $1;
   }
   | NUMBER
   {
     atLine(__LINE__);
 
-    char *temp = strdup($1);
-    free($1);
+    allocated_ptr.emplace_back($1);
 
-    $$ = temp;
+    $$ = $1;
+  }
+  | IDENTIFIER ':' expr
+  {
+    atLine(__LINE__);
+    auto it = parser_map.find($3);
+    if (it != parser_map.end()) {
+      parser_map[$1] = it->second;
+      parser_map.erase($3);
+      atLine(__LINE__);
+    } else {
+      addEntry($1, $3, __LINE__);
+    }
+    count += parser_map.size();
+
+    allocated_ptr.emplace_back($1);
+
+    $$ = $1;
   }
   ;
 
@@ -443,7 +476,10 @@ get_property:
     addEntry(tempIndex, $1, __LINE__);
 
     free(temp);
-    free(index);    
+    free(index);
+
+    allocated_ptr.emplace_back($1);
+    allocated_ptr.emplace_back(tempIndex);   
 
     $$ = tempIndex;
   }
@@ -463,7 +499,10 @@ get_property:
     addEntry(tempIndex, $1, __LINE__);
 
     free(temp);
-    free(index);    
+    free(index);
+
+    allocated_ptr.emplace_back($1);
+    allocated_ptr.emplace_back(tempIndex);   
 
     $$ = tempIndex;   
   }

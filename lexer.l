@@ -14,7 +14,7 @@ extern int yylex();
 
 %%
 [ \t\n]         ; // ignore space, tab and newline symbol
-[-+*/%@^(){}:,.\[\]]      { return yytext[0]; }
+[-+*/%@^(){}:,\[\]]      { return yytext[0]; }
 pi              { return PI; }
 ".shape"        { return GET_SHAPE; }
 ".strides"      { return GET_STRIDES; }
