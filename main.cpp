@@ -6,11 +6,21 @@ int extern printMap();
 extern void clearParserMap();
 
 int main() {
-    YY_BUFFER_STATE buffer = yy_scan_string("ExpandWrapper(Arrange(t1), {t0, t1}) * stride[0]");
+    YY_BUFFER_STATE buffer = yy_scan_string("out: a - Floor(a / b) * b");
     yyparse();
     printMap();
 
     clearParserMap();
+
+    yy_delete_buffer(buffer);
+
+    buffer = yy_scan_string("out: a - Floor(a / b) * b");
+    yyparse();
+    printMap();
+
+    clearParserMap();
+
+    yy_delete_buffer(buffer);
 
     return 0;
 }

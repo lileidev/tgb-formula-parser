@@ -77,6 +77,9 @@ void clearParserMap() {
   }
   allocated_ptr.clear();
   parser_map.clear();
+}
+
+void resetCounter() {
   count = 1000;
 }
 
