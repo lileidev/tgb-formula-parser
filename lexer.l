@@ -1,13 +1,9 @@
 %option noyywrap
-%option yylineno
 %option outfile="lexer.c" header-file="lexer.h"
 
 %{
-#include <iostream>
 #include <string.h>
 #include "parser.h"
-
-using namespace std;
 
 extern int yylex();
 %}
@@ -22,6 +18,3 @@ pi              { return PI; }
 -?[0-9]+(\.[0-9]+)?         { yylval.strval = strdup(yytext); return NUMBER; }
 .               { printf("Invalid character: %s\n", yytext); }
 %%
-
-// release strdup memory
-

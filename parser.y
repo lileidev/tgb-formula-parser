@@ -127,7 +127,7 @@ expr:
   | '{' expr_list '}'
   {
     atLine(__LINE__);
-    char* temp = strdup("t");
+    char* temp = strdup("tgb##tmp");
     char* index = strdup(std::to_string(parser_map.size()+count).c_str());
     size_t tempLength = strlen(temp);
     size_t indexLength = strlen(index);
@@ -155,7 +155,7 @@ expr:
   | IDENTIFIER '[' NUMBER ']'
   {
     atLine(__LINE__);
-    char* temp = strdup("t");
+    char* temp = strdup("tgb##tmp");
     char* index = strdup(std::to_string(parser_map.size()+count).c_str());
     size_t tempLength = strlen(temp);
     size_t indexLength = strlen(index);
@@ -180,7 +180,7 @@ expr:
   | get_property '[' NUMBER ']'
   {
     atLine(__LINE__);
-    char* temp = strdup("t");
+    char* temp = strdup("tgb##tmp");
     char* index = strdup(std::to_string(parser_map.size()+count).c_str());
     size_t tempLength = strlen(temp);
     size_t indexLength = strlen(index);
@@ -209,7 +209,7 @@ expr:
   | IDENTIFIER '(' expr_list ')'
   {
     atLine(__LINE__);
-    char* temp = strdup("t");
+    char* temp = strdup("tgb##tmp");
     char* index = strdup(std::to_string(parser_map.size()+count).c_str());
     size_t tempLength = strlen(temp);
     size_t indexLength = strlen(index);
@@ -240,7 +240,7 @@ expr:
   | expr '+' expr
   {
     atLine(__LINE__);
-    char* temp = strdup("t");
+    char* temp = strdup("tgb##tmp");
     char* index = strdup(std::to_string(parser_map.size()+count).c_str());
     size_t tempLength = strlen(temp);
     size_t indexLength = strlen(index);
@@ -263,7 +263,7 @@ expr:
   | expr '-' expr
   {
     atLine(__LINE__);
-    char* temp = strdup("t");
+    char* temp = strdup("tgb##tmp");
     char* index = strdup(std::to_string(parser_map.size()+count).c_str());
     size_t tempLength = strlen(temp);
     size_t indexLength = strlen(index);
@@ -286,7 +286,7 @@ expr:
   | '-' expr %prec UMINUS
   {
     atLine(__LINE__);
-    char* temp = strdup("t");
+    char* temp = strdup("tgb##tmp");
     char* index = strdup(std::to_string(parser_map.size()+count).c_str());
     size_t tempLength = strlen(temp);
     size_t indexLength = strlen(index);
@@ -308,7 +308,7 @@ expr:
   | expr '*' expr
   {
     atLine(__LINE__);
-    char* temp = strdup("t");
+    char* temp = strdup("tgb##tmp");
     char* index = strdup(std::to_string(parser_map.size()+count).c_str());
     size_t tempLength = strlen(temp);
     size_t indexLength = strlen(index);
@@ -331,7 +331,7 @@ expr:
   | expr '/' expr
   { 
     atLine(__LINE__);
-    char* temp = strdup("t");
+    char* temp = strdup("tgb##tmp");
     char* index = strdup(std::to_string(parser_map.size()+count).c_str());
     size_t tempLength = strlen(temp);
     size_t indexLength = strlen(index);
@@ -354,7 +354,7 @@ expr:
   | expr '%' expr
   {
     atLine(__LINE__);
-    char* temp = strdup("t");
+    char* temp = strdup("tgb##tmp");
     char* index = strdup(std::to_string(parser_map.size()+count).c_str());
     size_t tempLength = strlen(temp);
     size_t indexLength = strlen(index);
@@ -377,7 +377,7 @@ expr:
   | expr '@' expr
   {
     atLine(__LINE__);
-    char* temp = strdup("t");
+    char* temp = strdup("tgb##tmp");
     char* index = strdup(std::to_string(parser_map.size()+count).c_str());
     size_t tempLength = strlen(temp);
     size_t indexLength = strlen(index);
@@ -400,7 +400,7 @@ expr:
   | expr '^' expr
   { 
     atLine(__LINE__);
-    char* temp = strdup("t");
+    char* temp = strdup("tgb##tmp");
     char* index = strdup(std::to_string(parser_map.size()+count).c_str());
     size_t tempLength = strlen(temp);
     size_t indexLength = strlen(index);
@@ -467,7 +467,7 @@ get_property:
   IDENTIFIER GET_SHAPE
   {
     atLine(__LINE__);
-    char* temp = strdup("t");
+    char* temp = strdup("tgb##tmp");
     char* index = strdup(std::to_string(parser_map.size()+count).c_str());
     size_t tempLength = strlen(temp);
     size_t indexLength = strlen(index);
@@ -490,7 +490,7 @@ get_property:
   | IDENTIFIER GET_STRIDES
   {
     atLine(__LINE__);
-    char* temp = strdup("t");
+    char* temp = strdup("tgb##tmp");
     char* index = strdup(std::to_string(parser_map.size()+count).c_str());
     size_t tempLength = strlen(temp);
     size_t indexLength = strlen(index);
